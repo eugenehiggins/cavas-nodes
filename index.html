@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #myCanvas {
+            border: 5px solid aqua;
+        }
+    </style>
+</head>
+<body onresize="resizeCanvas()">
+
+<canvas id="myCanvas"></canvas>
+
+<script>
+
+	let canvas, nodes, getMouseClickCoords, createNodeObj;
+
+	function draw(nodeObj) {
+		if (canvas.getContext) {
+			let ctx = canvas.getContext('2d');
+			ctx.beginPath();
+
+			let radius = 1 * (1 + nodeObj.radius); // Arc radius
+			let startAngle = 0; // Starting point on circle
+			let endAngle = 360 // Math.PI + (Math.PI * j) / 2; // End point on circle
+			//let anticlockwise = i % 2 !== 0; // clockwise or anticlockwise
+
+			ctx.arc(nodeObj.x, nodeObj.y, radius, startAngle, endAngle);
+			ctx.stroke();
+		} else {
+			// canvas not supported
+		}
+	}
+
+	function plusOrMinus() {
+		return Math.random() < 0.5 ? -1 : 1;
+	}
+
+	function resizeCanvas(el) {
+		element = el || document.getElementById('myCanvas');
+		element.width = document.body.clientWidth;
+		element.height = window.innerHeight;
+	}
+
+	function getRandom(max, min, isRandomNegative, intOrFloat = "i", _multiplier) {
+		//let pOrM = isRandomNegative ? plusOrMinus() : 1;
+		if (isRandomNegative) max = max * plusOrMinus()
+		let multiplier = _multiplier || 1;
+		let random = Math.random() * (+max - +min) + +min;
+		return random;
+	}
+
+
+	function drawTimer() {
+		const context = canvas.getContext('2d');
+
+		context.clearRect(0, 0, canvas.width, canvas.height);
+
+		nodes.map(function (node) {
+
+			if (node.x > canvas.width || node.x < 0 || node.y > canvas.height || node.y < 0 ) node.angle *= -1;
+
+			node.x += Math.cos(node.angle) * node.speed;
+			node.y += Math.sin(node.angle) * node.speed;
+			draw(node);
+
+		})
+		setTimeout(drawTimer, 30)
+	}
+
+	document.addEventListener("DOMContentLoaded", function (event) {
+		canvas = document.getElementById('myCanvas');
+
+		resizeCanvas(canvas);
+
+		nodes = [];
+
+		getMouseClickCoords = function (e) {
+			return {x: e.clientX, y: e.clientY};
+		}
+
+		canvas.addEventListener('click', function (e) {
+			let coords = getMouseClickCoords(e);
+			let node = createNodeObj(coords.x, coords.y);
+			//draw(node)
+		});
+
+		createNodeObj = function (_x, _y) {
+			//var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
+			let self = this;
+
+			let node = {};
+			node.x = _x;
+			node.y = _y;
+			node.angle = getRandom(3.14, 0, true, "f");
+			node.radius = getRandom(35, 5, false, "i", 0.001);
+			node.speed = getRandom(10, 3, false, "i")
+
+			node.getOffset = function () {
+
+			}
+
+			// node.repeatTimer = function(){
+			//     setTimeout(function () {
+			//         node.x = node.x + Math.cos(node.angle) * 5;
+			//         node.y = node.y + Math.sin(node.angle) * 5;
+			//         console.log(node.x, node.y)
+			//         draw(node)
+			//         node.repeatTimer();
+			//     }, 1000)
+			// }
+			//node.repeatTimer();
+
+			nodes.push(node);
+			//return node;
+		}
+
+		let timeout = setTimeout(drawTimer, 30);
+
+	});
+
+</script>
+
+</body>
+</html>
